@@ -37,7 +37,9 @@ class StrategyResolver(StrategyCoreResolver):
             "sett.pricePerFullShare"
         )
 
-        # # Strategist should earn if fee is enabled and value was generated
+        assert valueGained == True
+
+        # Strategist should earn if fee is enabled and value was generated
         if before.get("strategy.performanceFeeStrategist") > 0 and valueGained:
             assert after.balances("want", "strategist") > before.balances(
                 "want", "strategist"
