@@ -34,9 +34,9 @@ contract MyStrategy is BaseStrategy {
 
   address public constant ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
   address public constant AAVE_TOKEN =
-    0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9;
+    0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9;
   address public constant WETH_TOKEN =
-    0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2;
+    0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
   // Used to signal to the Badger Tree that rewards where sent to it
   event TreeDistribution(
@@ -175,6 +175,40 @@ contract MyStrategy is BaseStrategy {
     if (rewardsAmount == 0) {
       return 0;
     }
+
+    // Second, swap from stkAAVE to AAVE
+    ISwapRouter.ExactInputSingleParams memory fromRewardToAAVEParams =
+      ISwapRouter.ExactInputSingleParams(
+        reward,
+        AAVE_TOKEN,
+        10000,
+        address(this),
+        now,
+        rewardsAmount,
+        0,
+        0
+      );
+    ISwapRouter(ROUTER).exactInputSingle(fromRewardToAAVEParams);
+
+    bytes memory path =
+      abi.encodePacked(
+        AAVE_TOKEN,
+        uint24(10000),
+        WETH_TOKEN,
+        uint24(10000),
+        want
+      );
+
+    ISwapRouter.ExactInputParams memory fromAAVEToUSDTParams =
+      ISwapRouter.ExactInputParams(
+        path,
+        address(this),
+        now,
+        IERC20Upgradeable(AAVE_TOKEN).balanceOf(address(this)),
+        0
+      );
+
+    ISwapRouter(ROUTER).exactInput(fromAAVEToUSDTParams);
 
     uint256 earned =
       IERC20Upgradeable(want).balanceOf(address(this)).sub(_before);
