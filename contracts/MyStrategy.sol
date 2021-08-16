@@ -12,6 +12,7 @@ import "../deps/@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgrade
 import "../interfaces/badger/IController.sol";
 
 import "../interfaces/aave/ILendingPool.sol";
+import "../interfaces/aave/IAaveIncentivesController.sol";
 
 import { BaseStrategy } from "../deps/BaseStrategy.sol";
 
@@ -26,6 +27,8 @@ contract MyStrategy is BaseStrategy {
   address public constant LENDING_POOL =
     0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
 
+  address public constant INCENTIVES_CONTROLLER =
+    0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5;
   // Used to signal to the Badger Tree that rewards where sent to it
   event TreeDistribution(
     address indexed token,
@@ -146,6 +149,23 @@ contract MyStrategy is BaseStrategy {
     uint256 _before = IERC20Upgradeable(want).balanceOf(address(this));
 
     // Write your code here
+
+    // First, claim rewards
+
+    address[] memory assets = new address[](1);
+    assets[0] = aToken;
+
+    IAaveIncentivesController(INCENTIVES_CONTROLLER).claimRewards(
+      assets,
+      type(uint256).max,
+      address(this)
+    );
+
+    uint256 rewardsAmount = IERC20Upgradeable(reward).balanceOf(address(this));
+
+    if (rewardsAmount == 0) {
+      return 0;
+    }
 
     uint256 earned =
       IERC20Upgradeable(want).balanceOf(address(this)).sub(_before);
