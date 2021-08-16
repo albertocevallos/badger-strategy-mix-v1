@@ -14,6 +14,8 @@ import "../interfaces/badger/IController.sol";
 import "../interfaces/aave/ILendingPool.sol";
 import "../interfaces/aave/IAaveIncentivesController.sol";
 
+import "../interfaces/uniswap/ISwapRouter.sol";
+
 import { BaseStrategy } from "../deps/BaseStrategy.sol";
 
 contract MyStrategy is BaseStrategy {
@@ -24,11 +26,18 @@ contract MyStrategy is BaseStrategy {
   // address public want // Inherited from BaseStrategy, the token the strategy wants, swaps into and tries to grow
   address public aToken; // Token we provide liquidity with
   address public reward; // Token we farm and swap to want / aToken
+
   address public constant LENDING_POOL =
     0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
-
   address public constant INCENTIVES_CONTROLLER =
     0xd784927Ff2f95ba542BfC824c8a8a98F3495f6b5;
+
+  address public constant ROUTER = 0xE592427A0AEce92De3Edee1F18E0157C05861564;
+  address public constant AAVE_TOKEN =
+    0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9;
+  address public constant WETH_TOKEN =
+    0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2;
+
   // Used to signal to the Badger Tree that rewards where sent to it
   event TreeDistribution(
     address indexed token,
